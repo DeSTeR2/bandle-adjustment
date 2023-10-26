@@ -6,4 +6,8 @@ private:
 
 public:
 	Point2D(int camera, int pointNum, float x, float y);		
+	float getX();
+	float getY();
+	int getCamera();
+	int getPointNum();
 };
