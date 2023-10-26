@@ -68,13 +68,3 @@ int main() {
 	}
 
 }
-/*
-	49 - cameras  441 - camera parametres 
-	7776 - points 
-
-	31845 - st
-	55613 - end 
-
-	23768
-
-*/
