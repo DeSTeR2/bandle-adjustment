@@ -1,6 +1,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <Eigen/Dense>
+#include <unsupported/Eigen/NumericalDiff>
 #include <vector>
 
 #include <GLFW/glfw3.h>
@@ -61,7 +62,7 @@ bool inputParam() {
 			cin >> x;
 			a.pb(x);
 		}
-		Point3D point(a[0], a[1], a[2]);
+		Point3D point(a[0], a[1], a[2], i);
 		D3Points.pb(point);
 	}
 	fclose(stdin);
