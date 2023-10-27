@@ -1,4 +1,6 @@
 #pragma once
+#include <iostream>
+
 class Point2D {
 private:
 	int camera, pointNum;
@@ -10,4 +12,10 @@ public:
 	float getY();
 	int getCamera();
 	int getPointNum();
+	
+	float euclidianNorm();
+
+	void setX(float x);
+	void setY(float y);
+	
 };

@@ -1,4 +1,6 @@
 #pragma once
+#include <iostream>
+
 class Point3D
 {
 private:
@@ -13,5 +15,18 @@ public:
 	float getY();
 	float getZ();
 	int getNum();
+
+	void setX(float x);
+	void setY(float y);
+	void setZ(float z);
+
+	Point3D operator+(Point3D obj);
+	Point3D operator*(Point3D obj);
+
+	Point3D operator+(float X);
+	Point3D operator*(float X);
+	Point3D operator/(float X);
+
+	float euclidianNorm();
 };
 

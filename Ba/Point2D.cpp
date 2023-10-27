@@ -1,4 +1,5 @@
 #include "Point2D.h"
+
 Point2D::Point2D(int camera, int pointNum, float x, float y) {
 	this->camera = camera;
 	this->pointNum = pointNum;
@@ -19,4 +20,15 @@ int Point2D::getCamera() {
 }
 int Point2D::getPointNum() {
 	return this->pointNum;
+}
+
+float Point2D::euclidianNorm() {
+	return sqrt(this->x * this->x + this->y * this->y);
+}
+
+void Point2D::setX(float x) {
+	this->x = x;
+}
+void Point2D::setY(float y) {
+	this->y = y;
 }
