@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 #include <stdio.h>
 #include <Eigen/Dense>
 #include <unsupported/Eigen/NumericalDiff>
@@ -11,6 +11,7 @@
 #include "Camera.h"
 
 using namespace std;
+using namespace Eigen;
 
 #define _CRT_SECURE_NO_DEPRECATE
 #define pb push_back
@@ -22,7 +23,7 @@ using namespace std;
 const int wert = 1900, hor = 1000;
 
 int numCamera, numPoints, numObservations;
-vector<Point2D> D2Points;
+vector<Point2D> D2Points, D2ProjectedPoints;
 vector<Camera> Cameras;
 vector<Point3D> D3Points;
 
@@ -87,12 +88,21 @@ void project3DPoint() {
 
 		Point3D p1 = p * (f * rP);
 
-		D2Points[i].setX(p1.getX());
-		D2Points[i].setY(p1.getY());
+		D2ProjectedPoints.pb(D2Points[i]);
+
+		D2ProjectedPoints[i].setX(p1.getX());
+		D2ProjectedPoints[i].setY(p1.getY());
 	}
 }
 
+void QRDecomposition(MatrixXf A) {
+	HouseholderQR<MatrixXf> qr(A);
+	MatrixXf Q = qr.householderQ();
+	MatrixXf R = qr.matrixQR().triangularView<Upper>();
+}
+
 int main() {
+
 	if (inputParam() == true) {
 		cout << "OK: Seccesfully read the file" << endl;
 	}
@@ -132,13 +142,20 @@ int main() {
 		glBegin(GL_POINTS); 
 
 		float param = 100, offsetX = 2, offsetY = 2;
-		for (int i = 0; i < D2Points.size(); i++) {
-			if (D2Points[i].getCamera() == int(num)) {
+		for (int i = 0; i < D2ProjectedPoints.size(); i++) {
+			if (D2ProjectedPoints[i].getCamera() == int(num)) {
 					//				float X = ((1.0 / D2Points[i].getX()) + offsetX) * param + 30*(sqrt(abs(D2Points[i].getX()))), Y = ((1.0 / D2Points[i].getY()) + offsetY) * param + 30 * (sqrt(abs(D2Points[i].getY())));
-				float X = (D2Points[i].getX()), Y = (D2Points[i].getY());
+				float X = (D2ProjectedPoints[i].getX()), Y = (D2ProjectedPoints[i].getY());
 				X = X + 700;
 				Y = Y + 500;
 				glVertex2d(X, Y);
+
+				X = (D2Points[i].getX()), Y = (D2Points[i].getY());
+				X = X + 700;
+				Y = Y + 500;
+				glVertex2d(X, Y);
+
+
 			}
 		}
 

@@ -32,3 +32,67 @@ void Point2D::setX(float x) {
 void Point2D::setY(float y) {
 	this->y = y;
 }
+
+Point2D Point2D::operator+(Point2D obj) {
+	float x = obj.getX() + this->getX();
+	float y = obj.getY() + this->getY();
+
+	Point2D res(this->getCamera(), this->getPointNum(), x, y);
+	return res;
+}
+
+Point2D Point2D::operator-(Point2D obj) {
+	float x = this->getX() - obj.getX();
+	float y = this->getY() - obj.getY();
+
+	Point2D res(this->getCamera(), this->getPointNum(), x, y);
+	return res;
+}
+
+Point2D Point2D::operator*(Point2D obj) {
+	float x = obj.getX() * this->getX();
+	float y = obj.getY() * this->getY();
+
+	Point2D res(this->getCamera(), this->getPointNum(), x, y);
+	return res;
+}
+
+Point2D Point2D::operator/(Point2D obj) {
+	float x = this->getX() / obj.getX();
+	float y = this->getY() / obj.getY();
+
+	Point2D res(this->getCamera(), this->getPointNum(), x, y);
+	return res;
+}
+
+Point2D Point2D::operator+(float X) {
+	float x = this->getX() + X;
+	float y = this->getY() + X;
+
+	Point2D res(this->getCamera(), this->getPointNum(), x, y);
+	return res;
+}
+
+Point2D Point2D::operator-(float X) {
+	float x = this->getX() - X;
+	float y = this->getY() - X;
+
+	Point2D res(this->getCamera(), this->getPointNum(), x, y);
+	return res;
+}
+
+Point2D Point2D::operator*(float X) {
+	float x = X * this->getX();
+	float y = X * this->getY();
+
+	Point2D res(this->getCamera(), this->getPointNum(), x, y);
+	return res;
+}
+
+Point2D Point2D::operator/(float X) {
+	float x = this->getX() / X;
+	float y = this->getY() / X;
+
+	Point2D res(this->getCamera(), this->getPointNum(), x, y);
+	return res;
+}

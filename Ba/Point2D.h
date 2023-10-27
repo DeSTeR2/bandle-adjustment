@@ -18,4 +18,14 @@ public:
 	void setX(float x);
 	void setY(float y);
 	
+	Point2D operator+(Point2D obj);
+	Point2D operator-(Point2D obj);
+	Point2D operator/(Point2D obj);
+	Point2D operator*(Point2D obj);
+
+	Point2D operator+(float X);
+	Point2D operator-(float X);
+	Point2D operator*(float X);
+	Point2D operator/(float X);
+
 };
