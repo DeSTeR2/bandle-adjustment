@@ -95,13 +95,53 @@ void project3DPoint() {
 	}
 }
 
-void QRDecomposition(MatrixXf A) {
+vector<MatrixXf> QRDecomposition(MatrixXf A) { // TO DO
+	const float cnt = -1e6;
+	
 	HouseholderQR<MatrixXf> qr(A);
 	MatrixXf Q = qr.householderQ();
-	MatrixXf R = qr.matrixQR().triangularView<Upper>();
+	MatrixXf R = qr.matrixQR().triangularView<Upper>(); 
+
+	Q *= (-1);
+	R *= (-1);
+
+	MatrixXf Q1(Q.rows(), Q.cols()), Q2(Q.rows(), Q.cols());
+	Q1 *= 0;
+	Q2 *= 0;
+	
+	for (int i = 0; i < A.cols(); i++) {
+		for (int j = 0; j < Q.cols(); j++) {
+			Q1(j, i) = Q(j, i);
+		}
+		
+	}
+
+	for (int i = A.cols(); i < Q.rows(); i++) {
+		for(int j = 0; j<Q.cols();j++) {
+			Q2(j, i - A.cols()) = Q(j, i);
+		}
+	}
+
+	MatrixXf R1 = Q2.transpose() * A;
+
+	for (int i = 0; i < R1.rows(); i++) {
+		for (int j = 0; j < R1.cols(); j++) {
+			if (R1(i, j) <= cnt) R1(i, j) = 0;
+		}
+	}
+
+	/*cout << "A:" << endl << A << endl << endl;
+	cout << "Q:" << endl << Q << endl << endl;
+	cout << "R:" << endl << R << endl << endl;*/
+
+	vector<MatrixXf> v;
+	v.pb(Q1); v.pb(Q2); v.pb(R1);
+
+	return v;
 }
 
 int main() {
+
 
 	if (inputParam() == true) {
 		cout << "OK: Seccesfully read the file" << endl;
@@ -115,7 +155,7 @@ int main() {
 		return -1;
 
 	window = glfwCreateWindow(wert, hor, "Hello World", NULL, NULL);
-	if (!window)
+	if (!window)	
 	{
 		glfwTerminate();
 		return -1;
@@ -173,6 +213,7 @@ int main() {
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	return 0;
+
 
 
 }
