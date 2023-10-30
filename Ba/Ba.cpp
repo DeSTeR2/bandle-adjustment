@@ -71,8 +71,6 @@ bool inputParam() {
 	return true;
 }
 
-
-
 void project3DPoint() {
 	for (int i = 0; i < D2Points.size(); i++) {
 		Point3D X = D3Points[D2Points[i].getPointNum()];
@@ -95,8 +93,51 @@ void project3DPoint() {
 	}
 }
 
-vector<MatrixXf> QRDecomposition(MatrixXf A) { // TO DO
-	const float cnt = -1e6;
+float residual(int i) {
+	return (D2ProjectedPoints[i] - D2Points[i]).euclidianNorm() * (D2ProjectedPoints[i] - D2Points[i]).euclidianNorm();
+}
+
+VectorXd computeJacError(int i) {
+	VectorXd error(2);
+
+	error(0) = D2ProjectedPoints[i].getX() - D2Points[i].getX();
+	error(1) = D2ProjectedPoints[i].getY() - D2Points[i].getY();
+	
+	return error;
+}
+
+MatrixXf JacobiansLandmark() {
+	float H = 1e-6;
+	MatrixXf J(2*D2Points.size(), 3 * D2Points.size());
+
+	for (int k = 0; k < D3Points.size(); k++) {
+		for (int i = 0; i < 3; i++) {
+			
+			Vector3d xPlusH;
+			xPlusH(0) = D3Points[k].getX();
+			xPlusH(1) = D3Points[k].getX();
+			xPlusH(2) = D3Points[k].getX();
+			
+			xPlusH(i) += H;
+			
+			VectorXd yPlusH = computeJacError(k);
+			J.block<2, 1>(2 * k, 3 * k + i) = (yPlusH - computeJacError(k)) / H;
+		}
+	}
+
+	return J;
+}
+
+MatrixXf JacobianPose() {
+	int numPose = D2ProjectedPoints.size();
+	int m = 2 * numPose;
+	int n = m;
+	MatrixXf J = MatrixXf::Identity(m, n);
+	return J;
+}
+
+vector<MatrixXf> QRDecomposition(MatrixXf A) {
+	const float cnt = 1e-6;
 	
 	HouseholderQR<MatrixXf> qr(A);
 	MatrixXf Q = qr.householderQ();
@@ -138,6 +179,26 @@ vector<MatrixXf> QRDecomposition(MatrixXf A) { // TO DO
 	v.pb(Q1); v.pb(Q2); v.pb(R1);
 
 	return v;
+}
+
+
+float toMin(MatrixXf Q2, float r, MatrixXf Jp, float delX) {
+	Q2 = Q2.transpose();
+
+	Vector2f A = Q2 * r + Q2 * Jp * delX;
+	Point2D point(float(A(0)), float(A(1)));
+	return point.euclidianNorm() * point.euclidianNorm();
+}
+
+void solver() {
+	/*
+	
+		||Q2(t)r+Q2(t)Jp del(Xp)||^2 - Point2D 
+	
+	*/
+
+	MatrixXf Jl = JacobiansLandmark();
+	vector<MatrixXf> v = QRDecomposition(Jl);
 }
 
 int main() {
@@ -207,7 +268,7 @@ int main() {
 		num+=0.01;
 		if (num >= numCamera) num -= numCamera;
 
-
+		
 	}
 
 	glfwDestroyWindow(window);
