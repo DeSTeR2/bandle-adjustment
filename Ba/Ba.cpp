@@ -1,4 +1,5 @@
-﻿#include <iostream>
+﻿
+#include <iostream>
 #include <stdio.h>
 #include <Eigen/Dense>
 #include <unsupported/Eigen/NumericalDiff>
@@ -97,8 +98,8 @@ float residual(int i) {
 	return (D2ProjectedPoints[i] - D2Points[i]).euclidianNorm() * (D2ProjectedPoints[i] - D2Points[i]).euclidianNorm();
 }
 
-VectorXd computeJacError(int i) {
-	VectorXd error(2);
+Vector3d computeJacError(int i) {
+	Vector3d error(2);
 
 	error(0) = D2ProjectedPoints[i].getX() - D2Points[i].getX();
 	error(1) = D2ProjectedPoints[i].getY() - D2Points[i].getY();
@@ -106,47 +107,60 @@ VectorXd computeJacError(int i) {
 	return error;
 }
 
-MatrixXf JacobiansLandmark() {
+Vector3d computeJacError(Vector3d x, int i) { 
+	Vector3d error(2);
+	Vector3d A(2);
+	A(0) = D2Points[i].getX();
+	A(1) = D2Points[i].getY();
+
+	error = x - A;
+	return error;
+}
+
+MatrixXd JacobiansLandmark() {
 	float H = 1e-6;
-	MatrixXf J(2*D2Points.size(), 3 * D2Points.size());
+	MatrixXd J(2*D2Points.size(), 3 * D2Points.size());
 
 	for (int k = 0; k < D3Points.size(); k++) {
 		for (int i = 0; i < 3; i++) {
 			
 			Vector3d xPlusH;
 			xPlusH(0) = D3Points[k].getX();
-			xPlusH(1) = D3Points[k].getX();
-			xPlusH(2) = D3Points[k].getX();
+			xPlusH(1) = D3Points[k].getY();
+			xPlusH(2) = D3Points[k].getZ();
 			
 			xPlusH(i) += H;
 			
-			VectorXd yPlusH = computeJacError(k);
-			J.block<2, 1>(2 * k, 3 * k + i) = (yPlusH - computeJacError(k)) / H;
+			Vector3d yPlusH = computeJacError(xPlusH, k);
+			yPlusH = (yPlusH - computeJacError(k))/H;
+			J(2 * k, 3 * k + 1) = yPlusH(0);
+			J(2 * k + 1, 3 * k + 1) = yPlusH(1);
+			//J.block<2, 1>(2 * k, 3 * k + i) = (yPlusH - computeJacError(k)) /H;  - 2 лінії коду зверху еквівалентні до цього 
 		}
 	}
 
 	return J;
 }
 
-MatrixXf JacobianPose() {
+MatrixXd JacobianPose() {
 	int numPose = D2ProjectedPoints.size();
 	int m = 2 * numPose;
 	int n = m;
-	MatrixXf J = MatrixXf::Identity(m, n);
+	MatrixXd J = MatrixXd::Identity(m, n);
 	return J;
 }
 
-vector<MatrixXf> QRDecomposition(MatrixXf A) {
+vector<MatrixXd> QRDecomposition(MatrixXd A) {
 	const float cnt = 1e-6;
 	
-	HouseholderQR<MatrixXf> qr(A);
-	MatrixXf Q = qr.householderQ();
-	MatrixXf R = qr.matrixQR().triangularView<Upper>(); 
+	HouseholderQR<MatrixXd> qr(A);
+	MatrixXd Q = qr.householderQ();
+	MatrixXd R = qr.matrixQR().triangularView<Upper>(); 
 
 	Q *= (-1);
 	R *= (-1);
 
-	MatrixXf Q1(Q.rows(), Q.cols()), Q2(Q.rows(), Q.cols());
+	MatrixXd Q1(Q.rows(), Q.cols()), Q2(Q.rows(), Q.cols());
 	Q1 *= 0;
 	Q2 *= 0;
 	
@@ -163,7 +177,7 @@ vector<MatrixXf> QRDecomposition(MatrixXf A) {
 		}
 	}
 
-	MatrixXf R1 = Q2.transpose() * A;
+	MatrixXd R1 = Q2.transpose() * A;
 
 	for (int i = 0; i < R1.rows(); i++) {
 		for (int j = 0; j < R1.cols(); j++) {
@@ -175,30 +189,30 @@ vector<MatrixXf> QRDecomposition(MatrixXf A) {
 	cout << "Q:" << endl << Q << endl << endl;
 	cout << "R:" << endl << R << endl << endl;*/
 
-	vector<MatrixXf> v;
+	vector<MatrixXd> v;
 	v.pb(Q1); v.pb(Q2); v.pb(R1);
 
 	return v;
 }
 
 
-float toMin(MatrixXf Q2, float r, MatrixXf Jp, float delX) {
+float toMin(MatrixXd Q2, float r, MatrixXd Jp, float delX) {
 	Q2 = Q2.transpose();
 
-	Vector2f A = Q2 * r + Q2 * Jp * delX;
+	Vector2d A = Q2 * r + Q2 * Jp * delX;
 	Point2D point(float(A(0)), float(A(1)));
 	return point.euclidianNorm() * point.euclidianNorm();
 }
 
 void solver() {
+	
 	/*
-	
 		||Q2(t)r+Q2(t)Jp del(Xp)||^2 - Point2D 
-	
 	*/
+	
 
-	MatrixXf Jl = JacobiansLandmark();
-	vector<MatrixXf> v = QRDecomposition(Jl);
+	MatrixXd Jl = JacobiansLandmark();
+	vector<MatrixXd> v = QRDecomposition(Jl);
 }
 
 int main() {
